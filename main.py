@@ -21,12 +21,12 @@ class MainWindow(QMainWindow):
         widget = QWidget()
         layout = QVBoxLayout()
 
-        layout.addWidget(QLabel("🎉 Добро пожаловать в Auralis!"))
+        layout.addWidget(QLabel("Добро пожаловать в Auralis!"))
 
         # Пробуем получить данные пользователя
         try:
             headers = {"Authorization": f"Bearer {token}"}
-            response = requests.get("http://localhost:8000/me", headers=headers)
+            response = requests.get("http://127.0.0.1:8000/protected", headers=headers)
 
             if response.status_code == 200:
                 user_data = response.json()
@@ -67,7 +67,7 @@ class AppController:
     def validate_token(self, token):
         try:
             headers = {"Authorization": f"Bearer {token}"}
-            response = requests.get("http://localhost:8000/me", headers=headers)
+            response = requests.get("http://127.0.0.1:8000/protected", headers=headers)
             return response.status_code == 200
         except:
             return False
