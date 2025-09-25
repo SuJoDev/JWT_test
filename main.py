@@ -1,4 +1,3 @@
-# main.py
 import sys
 import requests
 from PyQt5.QtWidgets import (
@@ -39,12 +38,12 @@ class MainWindow(QMainWindow):
                 layout.addWidget(QLabel("Не удалось загрузить профиль"))
 
         except requests.exceptions.ConnectionError:
-            layout.addWidget(QLabel("❌ Сервер недоступен"))
+            layout.addWidget(QLabel("Сервер недоступен"))
         except Exception as e:
-            layout.addWidget(QLabel(f"❌ Ошибка: {str(e)}"))
+            layout.addWidget(QLabel(f"Ошибка: {str(e)}"))
 
         # Кнопка выхода
-        logout_button = QPushButton("🚪 Выйти")
+        logout_button = QPushButton("Выйти")
         logout_button.setStyleSheet("background-color: #ff6b6b; color: white; padding: 8px;")
         logout_button.clicked.connect(self.logout_callback)
         layout.addWidget(logout_button)

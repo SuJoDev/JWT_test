@@ -2,6 +2,8 @@ import requests
 from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox
 from PyQt5.QtCore import QSettings
 
+from capcha.caphca import CapchaWindow
+
 class LoginWindow(QWidget):
     def __init__(self, on_success):
         super().__init__()
@@ -51,6 +53,9 @@ class LoginWindow(QWidget):
             else:
                 error_detail = response.json().get("detail", "Неизвестная ошибка")
                 self.status_label.setText(f"❌ {error_detail}")
+                self.capha = CapchaWindow()
+                self.capha.show()
+                
 
         except requests.exceptions.ConnectionError:
             self.status_label.setText("❌ Сервер недоступен")
