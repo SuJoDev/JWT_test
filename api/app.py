@@ -8,6 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 
 from pydantic import BaseModel
 
+from models.shemas import UserSchema
+
 
 DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost/Auralis"
 SECRET_KEY = "secret_key"
@@ -42,6 +44,27 @@ from models.models import *
 class UserLoginShema(BaseModel):
     username: str
     password:  str
+    
+@app.post("/register")
+async def register(user: UserSchema, session: SessionDep, response: Response):
+    result = await session.execute(select(UsersModel).where(UsersModel.username == user.username))
+    if not result.scalar_one_or_none():
+        try:
+            db_user = UsersModel(
+                username=user.username,
+                password=user.password
+                    
+            )
+            
+            session.add(db_user)
+            await session.commit()
+            await session.refresh(db_user)
+            return user
+        except Exception as e:
+            await session.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
+        finally:
+            await session.close()
 
 @app.post("/login")
 async def login(username: str, password: str, session: SessionDep, response: Response):
