@@ -23,7 +23,6 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(QLabel("Добро пожаловать в Auralis!"))
 
-        # Пробуем получить данные пользователя
         try:
             headers = {"Authorization": f"Bearer {token}"}
             response = requests.get("http://127.0.0.1:8000/protected", headers=headers)
