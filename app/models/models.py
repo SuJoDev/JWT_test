@@ -90,13 +90,13 @@ class FavoritiesTracks(Base):
 class ListeningHistoryModel(IdMix, Base):
     __tablename__ = "listening_history"
     
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    track_id: Mapped[int] = mapped_column(ForeignKey("track.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    track_id: Mapped[int] = mapped_column(ForeignKey("tracks.id"))
     played_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         default= func.now()
     )
-    play_duraction: Mapped[int] = mapped_column()
+    play_duration: Mapped[int] = mapped_column()
     
 # class TrackModels(IdMix, Base):
 #     __tablename__ = "tracks"

@@ -8,3 +8,8 @@ class PlaylistSchema(BaseModel):
 class FavoritesShema(BaseModel):
     user_id: int
     track_id: int
+
+class ListeningHistoryShema(BaseModel):
+    user_id: int
+    track_id: int
+    play_duraction: int
