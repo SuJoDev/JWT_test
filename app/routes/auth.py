@@ -6,8 +6,8 @@ from sqlalchemy import select
 
 from typing import Annotated
 
-from app.core.config import settings
-from app.models.models import UsersModel
+from core.config import settings
+from models.models import UsersModel
 
 
 from pydantic import BaseModel
@@ -17,6 +17,8 @@ config = AuthXConfig()
 config.JWT_SECRET_KEY = settings.jwt_secret_key
 config.JWT_ACCESS_COOKIE_NAME = "my_access_token"
 config.JWT_TOKEN_LOCATION = ["cookies"]
+config.JWT_COOKIE_SECURE = False   # ❗ для localhost
+config.JWT_COOKIE_SAMESITE = "lax" # или "none"
 config.JWT_COOKIE_CSRF_PROTECT = False
 
 security = AuthX(config=config)
@@ -25,7 +27,7 @@ router = APIRouter()
 
 engine = create_async_engine(
     DATABASE_URL,
-    echo=False,  # отключить лог SQL в консоли (ускоряет)
+    echo=False,  # отключить лог SQL в консоли 
     pool_size=20,  # размер пула соединений
     max_overflow=10,  # дополнительные соединения сверх пула
     pool_pre_ping=True,  # проверять соединение перед использованием
@@ -65,24 +67,71 @@ async def register(user: UserLoginShema, session: SessionDep, response: Response
         finally:
             await session.close()
 
+class LoginSchema(BaseModel):
+    username: str
+    password: str
+
 @router.post("/login")
-async def login(username: str, password: str, session: SessionDep, response: Response):
-    result = await session.execute(select(UsersModel).where(UsersModel.username == username))
+async def login(data: LoginSchema, session: SessionDep, response: Response):
+    result = await session.execute(
+        select(UsersModel).where(UsersModel.username == data.username)
+    )
     user = result.scalar_one_or_none()
 
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+    if not user or data.password != user.password_hash:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # Асинхронная проверка пароля
-    if password == user.password_hash:
-    
-        token = security.create_access_token(uid=str(user.id))
-        response.set_cookie(config.JWT_ACCESS_COOKIE_NAME, token)
-            
-        return {"access_token" : token}
-    raise HTTPException(status_code=401, detail = "Incorect password or login")
+    token = security.create_access_token(uid=str(user.id))
+
+    response.set_cookie(
+        key=config.JWT_ACCESS_COOKIE_NAME,
+        value=token,
+        httponly=True,
+        samesite="lax",
+        secure=False,
+    )
+
+    return {
+        "user": {
+            "id": user.id,
+            "username": user.username
+        }
+    }
 
     
 @router.get("/protected", dependencies=[Depends(security.access_token_required)])
 async def protected():
     return {"message": "hello world!"}
+
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie("my_access_token")
+    return {"success": True}
+
+@router.get("/me")
+async def get_me(request: Request, session: SessionDep):
+    try:
+        token = request.cookies.get(config.JWT_ACCESS_COOKIE_NAME)
+        if not token:
+            return {"user": None}
+
+        payload = security._decode_token(token)
+        user_id = payload.get("sub") # type: ignore
+
+        result = await session.execute(
+            select(UsersModel).where(UsersModel.id == int(user_id))
+        )
+        user = result.scalar_one_or_none()
+
+        if not user:
+            return {"user": None}
+
+        return {
+            "user": {
+                "id": user.id,
+                "username": user.username
+            }
+        }
+
+    except Exception:
+        return {"user": None}

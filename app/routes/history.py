@@ -7,9 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 
 from typing import Annotated
 
-from app.core.config import settings
-from app.models.models import ListeningHistoryModel
-from app.shemas.shemas import ListeningHistoryShema
+from core.config import settings
+from models.models import ListeningHistoryModel
+from shemas.shemas import ListeningHistoryShema
 
 
 DATABASE_URL = settings.database_url

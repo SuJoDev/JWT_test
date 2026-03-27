@@ -17,7 +17,7 @@ class IdMix:
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
 class ArtistsModel(IdMix, Base):
-    __tablename__ = "artists"
+    __tablename__ = "Artists"
 
     name: Mapped[str] = mapped_column()
     description: Mapped[str] = mapped_column(TEXT)
@@ -30,21 +30,22 @@ class ArtistsModel(IdMix, Base):
     track: Mapped[list["TracksModel"]] = relationship("TracksModel", back_populates="artist")
     
 class AlbomsModel(IdMix, Base):
-    __tablename__ = "albums"
+    __tablename__ = "Albums"
 
-    artist_id: Mapped[int] = mapped_column(ForeignKey("artists.id"))
+    artist_id: Mapped[int] = mapped_column(ForeignKey("Artists.id"))
     title: Mapped[str] = mapped_column()
     release_date: Mapped[date] = mapped_column(DATE())
     cover_url: Mapped[str] = mapped_column()
     
 class TracksModel(IdMix, Base):
-    __tablename__ = "tracks"
+    __tablename__ = "Tracks"
     
-    album_id: Mapped[int] = mapped_column(ForeignKey("albums.id"))
-    artist_id: Mapped[int] = mapped_column(ForeignKey("artists.id"))
+    album_id: Mapped[int] = mapped_column(ForeignKey("Albums.id"))
+    artist_id: Mapped[int] = mapped_column(ForeignKey("Artists.id"))
     title: Mapped[str] = mapped_column()
     duration: Mapped[int] = mapped_column()
     file_url: Mapped[str] = mapped_column(TEXT)
+    img_url: Mapped[str] = mapped_column()
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         default=func.now()
@@ -53,7 +54,7 @@ class TracksModel(IdMix, Base):
     artist: Mapped["ArtistsModel"] = relationship("ArtistsModel", back_populates="track")
     
 class UsersModel(IdMix, Base):
-    __tablename__ = "users"
+    __tablename__ = "Users"
     
     username: Mapped[str] = mapped_column()
     email: Mapped[str] = mapped_column()
@@ -68,9 +69,9 @@ class UsersModel(IdMix, Base):
     )
     
 class PlaylistsModels(IdMix, Base):
-    __tablename__ = "playlists"
+    __tablename__ = "Playlists"
     
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     title: Mapped[str] = mapped_column(TEXT)
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
@@ -78,20 +79,20 @@ class PlaylistsModels(IdMix, Base):
     )
     
 class FavoritiesTracks(Base):
-    __tablename__ = "favorites"
+    __tablename__ = "Favorites"
     
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    track_id: Mapped[int] = mapped_column(ForeignKey("tracks.id"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"), primary_key=True)
+    track_id: Mapped[int] = mapped_column(ForeignKey("Tracks.id"), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         default= func.now()
     )
     
 class ListeningHistoryModel(IdMix, Base):
-    __tablename__ = "listening_history"
+    __tablename__ = "ListeningHistory"
     
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    track_id: Mapped[int] = mapped_column(ForeignKey("tracks.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"))
+    track_id: Mapped[int] = mapped_column(ForeignKey("Tracks.id"))
     played_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         default= func.now()

@@ -7,9 +7,9 @@ from sqlalchemy import select, join
 
 from typing import Annotated
 
-from app.core.config import settings
-from app.models.models import PlaylistsModels, TracksModel, ArtistsModel
-from app.shemas.shemas import PlaylistSchema
+from core.config import settings
+from models.models import PlaylistsModels, TracksModel, ArtistsModel
+from shemas.shemas import PlaylistSchema
 
 
 from pydantic import BaseModel
